@@ -3,17 +3,17 @@ import time
 from enum import Enum
 from async_get import async_get
 
-
-
-
 MIN_COUNT = 5
 MAX_COUNT = 20
 DATA_URL = "https://random-data-api.com/api/v2/addresses"
 COUNTRY_URL = "https://restcountries.com/v3.1/name"
+
+
 class Result(Enum):
     SUCCESS = 0
     FATAL = -1
     RETRY = -2
+
 
 def assert_int(s):
     try:
@@ -21,12 +21,14 @@ def assert_int(s):
     except:
         return None
 
+
 def handle_country_wrapper(job):
     ret = handle_country(job)
     if ret == Result.FATAL:
         job['return'] = Result.FATAL
     else:
         job['return'] = ret[0], f"{job['country']}: {ret[1]}"
+
 
 def handle_country(job):
     if job['status_code'] not in [200, 404]:
@@ -65,8 +67,6 @@ def handle_country(job):
     return population, f"{capital} - {population} - {languages}"
 
 
-
-
 def handle(count, print_stream):
     # Assert Number
     num = assert_int(count)
@@ -82,7 +82,8 @@ def handle(count, print_stream):
     if res.status_code != 200:
         return Result.FATAL, "random-data-api.com not available right now"
     addresses = res.json()
-    print_stream(addresses)
+    for addr in addresses:
+        print_stream(addr)
 
     # Extract Countries
     countries = []
@@ -102,7 +103,7 @@ def handle(count, print_stream):
     start_time = time.time()
     async_get(jobs, handle_country_wrapper)
     print_stream("-----------------------------------\nDONE:")
-    print_stream(f'random-data-api.com:\t{"%.2f" % (time.time()-start_time)}s')
+    print_stream(f'random-data-api.com:\t{"%.2f" % (time.time() - start_time)}s')
     print_stream(f'restcountries.com x{count}:\t{"%.2f" % random_data_api_time}s')
 
     parsed_countries = [job['return'] for job in jobs]

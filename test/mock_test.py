@@ -1,15 +1,13 @@
 import os, sys, json
-import requests
-import unittest
 from unittest import mock
 
 sys.path.append('../src')
 from RequestHandler import handle, Result
 
-
 TESTS_DIR = "tests"
 OKGREEN = '\033[92m'
 FAILRED = '\033[91m'
+
 
 def get_mocked_closure(resp_json):
     def mocked(*args, **kwargs):
@@ -22,13 +20,15 @@ def get_mocked_closure(resp_json):
                 return self.json_data
 
         return MockResponse(resp_json, 200)
+
     return mocked
+
 
 def run_test(resp_json, ans_json):
     @mock.patch('requests.get', side_effect=get_mocked_closure(resp_json))
     def test_closure(self):
-        return handle(len(resp_json), lambda x:x)[1] == ans_json
-    
+        return handle(len(resp_json), lambda x: x)[1] == ans_json
+
     return test_closure()
 
 
@@ -42,10 +42,3 @@ if __name__ == '__main__':
                     print(f"{OKGREEN}{test_dir} passed")
                 else:
                     print(f"{FAILRED}{test_dir} failed")
-
-
-
-
-
-    
-    
